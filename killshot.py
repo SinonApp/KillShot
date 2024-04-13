@@ -98,6 +98,27 @@ class WPSpin:
         self.algos = {'pin24': {'name': '24-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin24},
                       'pin28': {'name': '28-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin28},
                       'pin32': {'name': '32-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin32},
+
+                      'pin36': {'name': '36-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin36},
+                      'pin40': {'name': '40-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin40},
+                      'pin44': {'name': '44-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin44},
+                      'pin48': {'name': '48-bit PIN', 'mode': self.ALGO_MAC, 'gen': self.pin48},
+                      'pin24rh': {'name': 'Reverse byte 24-bit', 'mode': self.ALGO_MAC, 'gen': self.pin24rh},
+                      'pin32rh': {'name': 'Reverse byte 32-bit', 'mode': self.ALGO_MAC, 'gen': self.pin32rh},
+                      'pin48rh': {'name': 'Reverse byte 48-bit', 'mode': self.ALGO_MAC, 'gen': self.pin48rh},
+                      'pin24rn': {'name': 'Reverse nibble 24-bit', 'mode': self.ALGO_MAC, 'gen': self.pin24rn},
+                      'pin32rn': {'name': 'Reverse nibble 32-bit', 'mode': self.ALGO_MAC, 'gen': self.pin32rn},
+                      'pin48rn': {'name': 'Reverse nibble 48-bit', 'mode': self.ALGO_MAC, 'gen': self.pin48rn},
+                      'pin24rb': {'name': 'Reverse bits 24-bit', 'mode': self.ALGO_MAC, 'gen': self.pin24rb},
+                      'pin32rb': {'name': 'Reverse bits 32-bit', 'mode': self.ALGO_MAC, 'gen': self.pin32rb},
+                      'pin48rb': {'name': 'Reverse bits 48-bit', 'mode': self.ALGO_MAC, 'gen': self.pin48rb},
+                      'pinInvNIC': {'name': 'Inv NIC to PIN', 'mode': self.ALGO_MAC, 'gen': self.pinInvNIC},
+                      'pinNIC2': {'name': 'NIC * 2', 'mode': self.ALGO_MAC, 'gen': self.pinNIC2},
+                      'pinNIC3': {'name': 'NIC * 3', 'mode': self.ALGO_MAC, 'gen': self.pinNIC3},
+                      'pinOUIaddNIC': {'name': 'OUI + NIC', 'mode': self.ALGO_MAC, 'gen': self.pinOUIaddNIC},
+                      'pinOUIsubNIC': {'name': 'OUI − NIC', 'mode': self.ALGO_MAC, 'gen': self.pinOUIsubNIC},
+                      'pinOUIxorNIC': {'name': 'OUI ^ NIC', 'mode': self.ALGO_MAC, 'gen': self.pinOUIxorNIC},
+
                       'pinDLink': {'name': 'D-Link PIN', 'mode': self.ALGO_MAC, 'gen': self.pinDLink},
                       'pinDLink1': {'name': 'D-Link PIN +1', 'mode': self.ALGO_MAC, 'gen': self.pinDLink1},
                       'pinASUS': {'name': 'ASUS PIN', 'mode': self.ALGO_MAC, 'gen': self.pinASUS},
@@ -105,9 +126,32 @@ class WPSpin:
                       'pinEasybox': {'name': 'EasyBox', 'mode': self.ALGO_MAC, 'gen': self.pinEasybox},
                       'pinArris': {'name': 'Arris', 'mode': self.ALGO_MAC, 'gen': self.pinArris},
                       'pinTrendNet': {'name': 'TrendNet', 'mode': self.ALGO_MAC, 'gen': self.pinTrendNet},
+
                       # Static pin algos
                       'pinGeneric': {'name': 'Static', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 1234567, 'static': []},
-                      'pinEmpty': {'name': 'Empty PIN', 'mode': self.ALGO_EMPTY, 'gen': lambda mac: ''}}
+                      'pinEmpty': {'name': 'Empty PIN', 'mode': self.ALGO_EMPTY, 'gen': lambda mac: ''},
+                      'pinBrcm1': {'name': 'Broadcom 1', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 2017252},
+                      'pinBrcm2': {'name': 'Broadcom 2', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 4626484},
+                      'pinBrcm3': {'name': 'Broadcom 3', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 7622990},
+                      'pinBrcm4': {'name': 'Broadcom 4', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 6232714},
+                      'pinBrcm5': {'name': 'Broadcom 5', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 1086411},
+                      'pinBrcm6': {'name': 'Broadcom 6', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 3195719},
+                      'pinAirc1': {'name': 'Airocon 1', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 3043203},
+                      'pinAirc2': {'name': 'Airocon 2', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 7141225},
+                      'pinDSL2740R': {'name': 'DSL-2740R', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 6817554},
+                      'pinRealtek1': {'name': 'Realtek 1', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 9566146},
+                      'pinRealtek2': {'name': 'Realtek 2', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 9571911},
+                      'pinRealtek3': {'name': 'Realtek 3', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 4856371},
+                      'pinUpvel': {'name': 'Upvel', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 2085483},
+                      'pinUR814AC': {'name': 'UR-814AC', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 4397768},
+                      'pinUR825AC': {'name': 'UR-825AC', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 529417},
+                      'pinOnlime': {'name': 'Onlime', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 9995604},
+                      'pinEdimax': {'name': 'Edimax', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 3561153},
+                      'pinThomson': {'name': 'Thomson', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 6795814},
+                      'pinHG532x': {'name': 'HG532x', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 3425928},
+                      'pinH108L': {'name': 'H108L', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 9422988},
+                      'pinONO': {'name': 'CBN ONO', 'mode': self.ALGO_STATIC_DB, 'gen': lambda mac: 9575521},
+        }
 
     @staticmethod
     def checksum(pin):
@@ -285,6 +329,48 @@ class WPSpin:
     def pin32(self, mac):
         return mac.integer % 0x100000000
 
+    def pin36(self, mac):
+        return (mac.integer % 0x1000000000)
+
+    def pin40(self, mac):
+        return (mac.integer % 0x10000000000)
+
+    def pin44(self, mac):
+        return (mac.integer % 0x100000000000)
+
+    def pin48(self, mac):
+        return mac.integer
+
+    def pin24rh(self, mac):
+        b = [i for i in mac.string.split(':')]
+        return int(''.join(b[-1:-4:-1]), 16)
+
+    def pin32rh(self, mac):
+        b = [i for i in mac.string.split(':')]
+        return int(''.join(b[-1:-5:-1]), 16)
+
+    def pin48rh(self, mac):
+        b = [i for i in mac.string.split(':')]
+        return int(''.join(b[-1::-1]), 16)
+
+    def pin24rn(self, mac):
+        return int(mac.string.replace(':', '')[-1:-7:-1], 16)
+
+    def pin32rn(self, mac):
+        return int(mac.string.replace(':', '')[-1:-9:-1], 16)
+
+    def pin48rn(self, mac):
+        return int(mac.string.replace(':', '')[-1::-1], 16)
+
+    def pin24rb(self, mac):
+        return int(bin(mac.integer)[2:].zfill(24)[:-25:-1], 2)
+
+    def pin32rb(self, mac):
+        return int(bin(mac.integer)[2:].zfill(32)[:-33:-1], 2)
+
+    def pin48rb(self, mac):
+        return int(bin(mac.integer)[2:].zfill(48)[::-1], 2)
+
     def pinDLink(self, mac):
         # Get the NIC part
         nic = mac.integer & 0xFFFFFF
@@ -322,6 +408,41 @@ class WPSpin:
         + (((b[0] + b[1]) % 10) * 1000000)
         return pin
 
+    def pinInvNIC(self, mac):
+        nic = mac.integer & 0xFFFFFF
+        pin = ~nic & 0xFFFFFF
+        return pin
+
+    def pinNIC2(self, mac):
+        nic = mac.integer & 0xFFFFFF
+        pin = nic * 2
+        return pin
+
+    def pinNIC3(self, mac):
+        nic = mac.integer & 0xFFFFFF
+        pin = nic * 3
+        return pin
+
+    def pinOUIaddNIC(self, mac):
+        mac = mac.string.replace(':', '')
+        oui = int(mac[:6], 16)
+        nic = int(mac[6:], 16)
+        pin = (oui + nic) % int(10e6)
+        return pin
+
+    def pinOUIsubNIC(self, mac):
+        mac = mac.string.replace(':', '')
+        oui = int(mac[:6], 16)
+        nic = int(mac[6:], 16)
+        pin = oui - nic if nic < oui else (oui + 0x1000000 - nic) & 0xFFFFFF
+        return pin
+
+    def pinOUIxorNIC(self, mac):
+        mac = mac.string.replace(':', '')
+        oui = int(mac[:6], 16)
+        nic = int(mac[6:], 16)
+        pin = oui ^ nic
+        return pin
 
 def recvuntil(pipe, what):
     s = ''
