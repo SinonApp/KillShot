@@ -555,13 +555,22 @@ class Companion:
         self.connection_status = ConnectionStatus()
 
         user_home = str(pathlib.Path.home())
-        self.sessions_dir = f'{user_home}/.KillShot/sessions/'
-        self.pixiewps_dir = f'{user_home}/.KillShot/pixiewps/'
-        self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
-        if not os.path.exists(self.sessions_dir):
-            os.makedirs(self.sessions_dir)
-        if not os.path.exists(self.pixiewps_dir):
-            os.makedirs(self.pixiewps_dir)
+        try:
+            self.sessions_dir = f'{user_home}/.KillShot/sessions/'
+            self.pixiewps_dir = f'{user_home}/.KillShot/pixiewps/'
+            self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
+            if not os.path.exists(self.sessions_dir):
+                os.makedirs(self.sessions_dir)
+            if not os.path.exists(self.pixiewps_dir):
+                os.makedirs(self.pixiewps_dir)
+        except PermissionError:
+            self.sessions_dir = f'./.KillShot/sessions/'
+            self.pixiewps_dir = f'./.KillShot/pixiewps/'
+            self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
+            if not os.path.exists(self.sessions_dir):
+                os.makedirs(self.sessions_dir)
+            if not os.path.exists(self.pixiewps_dir):
+                os.makedirs(self.pixiewps_dir)
 
         self.generator = WPSpin()
 
