@@ -832,7 +832,9 @@ class Companion:
                     break
             except KeyboardInterrupt:
                 if input('[?] Continue spraying? [Y/n] ').lower() == 'n':
-                    break
+                    repeat = False
+            except Exception as e:
+                print(f'[!] Error: {e}')
 
     def single_connection(self, bssid=None, ssid=None, pin=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
                           pixieforce=False, store_pin_on_fail=False):
