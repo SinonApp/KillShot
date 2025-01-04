@@ -825,7 +825,8 @@ class Companion:
 
     def spray(self, bssid, pins, pixiemode=False, pbc_mode=False, showpixiecmd=False, pixieforce=False):
         for pin in pins:
-            if self.single_connection(bssid, pin=pin, pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
+            print(f'[*] PIN: {pin["pin"]} Algorithm: {pin["name"]}')
+            if self.single_connection(bssid, pin=pin['pin'], pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
                                       pixieforce=pixieforce):
                 break
 
