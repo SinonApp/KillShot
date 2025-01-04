@@ -826,9 +826,13 @@ class Companion:
     def spray(self, bssid, pins, pixiemode=False, pbc_mode=False, showpixiecmd=False, pixieforce=False):
         for pin in pins:
             print(f'[*] PIN: {pin["pin"]} Algorithm: {pin["name"]}')
-            if self.single_connection(bssid, pin=pin['pin'], pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
-                                      pixieforce=pixieforce):
-                break
+            try:
+                if self.single_connection(bssid, pin=pin['pin'], pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
+                                        pixieforce=pixieforce):
+                    break
+            except KeyboardInterrupt:
+                if input('[?] Continue spraying? [Y/n] ').lower() == 'n':
+                    break
 
     def single_connection(self, bssid=None, ssid=None, pin=None, pixiemode=False, pbc_mode=False, showpixiecmd=False,
                           pixieforce=False, store_pin_on_fail=False):
