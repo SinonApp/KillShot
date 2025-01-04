@@ -824,12 +824,8 @@ class Companion:
         return False
 
     def spray(self, bssid, pins, pixiemode=False, pbc_mode=False, showpixiecmd=False, pixieforce=False):
-        generatedPins = self.__generate_wpspin(bssid)
-        if generatedPins:
-            pins.extend(generatedPins)
-
         for pin in pins:
-            if self.single_connection(bssid, pin, pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
+            if self.single_connection(bssid, pin=pin, pixiemode=pixiemode, pbc_mode=pbc_mode, showpixiecmd=showpixiecmd,
                                       pixieforce=pixieforce):
                 break
 
