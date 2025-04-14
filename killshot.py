@@ -1156,7 +1156,12 @@ class WiFiScanner:
         for n, network in network_list_items:
             number = f'{n})'
             model = '{} {}'.format(network['Model'], network['Model number'])
-            essid = truncateStr(network['ESSID'], 25)
+
+            try:
+                essid = truncateStr(network['ESSID'], 25)
+            except:
+                continue
+
             deviceName = truncateStr(network['Device name'], 27)
             line = '{:<4} {:<18} {:<25} {:<8} {:<4} {:<27} {:<}'.format(
                 number, network['BSSID'], essid,
